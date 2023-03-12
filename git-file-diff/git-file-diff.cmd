@@ -14,6 +14,7 @@ set result_file=file-diff-result.txt
 set error_log_file=error.log
 @REM tmp files
 set result_tmp_file=.result.tmp
+set deduplicate_compare_branches_tmp_file=.deduplicate_compare_branches.tmp
 set diff_tmp_file=.diff.tmp
 set deduplicate_tmp_file=.deduplicate.tmp
 @REM var
@@ -21,12 +22,13 @@ set basic_branch=
 set error_msg=
 :set_var_end
 
-:clean_dir_start
 @REM clean work directory
+:clean_dir_start
 @REM clean result file if exists
 if exist %result_file% ( del %result_file% )
 @REM clean tmp files if exists
 if exist %result_tmp_file% ( del %result_tmp_file% )
+if exist %deduplicate_compare_branches_tmp_file% ( del %deduplicate_compare_branches_tmp_file% )
 if exist %diff_tmp_file% ( del %diff_tmp_file% )
 if exist %deduplicate_tmp_file% ( del %deduplicate_tmp_file% )
 :clean_dir_end
@@ -55,8 +57,8 @@ echo basic branch is %basic_branch%.
 
 :diff_start
 echo starting diff...
-if exist [%diff_tmp_file%] ( del %diff_tmp_file% )
-for /f "eol=#" %%i in ( %compare_branches_file% ) do (
+sort /unique %compare_branches_file% > %deduplicate_compare_branches_tmp_file%
+for /f "eol=#" %%i in ( %deduplicate_compare_branches_tmp_file% ) do (
     echo diff %basic_branch%..%%i
     git diff --name-only %basic_branch%..%%i >> %diff_tmp_file%
     copy %diff_tmp_file% %result_tmp_file% > NUL
@@ -74,7 +76,11 @@ echo deduplicate done!
 :deduplicate_end
 
 copy %result_tmp_file% %result_file% > NUL
-del %diff_tmp_file% %deduplicate_tmp_file% %result_tmp_file%
+@REM clean tmp files if exists
+if exist %result_tmp_file% ( del %result_tmp_file% )
+if exist %deduplicate_compare_branches_tmp_file% ( del %deduplicate_compare_branches_tmp_file% )
+if exist %diff_tmp_file% ( del %diff_tmp_file% )
+if exist %deduplicate_tmp_file% ( del %deduplicate_tmp_file% )
 echo SUCCESS! see diff result in %result_file%
 if exist %error_log_file% ( del %error_log_file% )
 goto end
@@ -85,6 +91,11 @@ goto end
 :error_start
 echo %error_msg%
 echo %error_msg% > "%error_log_file%"
+@REM clean tmp files if exists
+if exist %result_tmp_file% ( del %result_tmp_file% )
+if exist %deduplicate_compare_branches_tmp_file% ( del %deduplicate_compare_branches_tmp_file% )
+if exist %diff_tmp_file% ( del %diff_tmp_file% )
+if exist %deduplicate_tmp_file% ( del %deduplicate_tmp_file% )
 goto end
 :errot_end
 
