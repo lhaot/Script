@@ -2,6 +2,7 @@
 chcp 65001 > NUL
 
 :start
+cd /d %~dp0
 
 :main_start
 
