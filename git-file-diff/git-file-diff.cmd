@@ -18,6 +18,7 @@ set result_tmp_file=.result.tmp
 set deduplicate_compare_branches_tmp_file=.deduplicate_compare_branches.tmp
 set diff_tmp_file=.diff.tmp
 set deduplicate_tmp_file=.deduplicate.tmp
+set sort_tmp_file=.sort.tmp
 @REM var
 set basic_branch=
 set error_msg=
@@ -32,6 +33,7 @@ if exist %result_tmp_file% ( del %result_tmp_file% )
 if exist %deduplicate_compare_branches_tmp_file% ( del %deduplicate_compare_branches_tmp_file% )
 if exist %diff_tmp_file% ( del %diff_tmp_file% )
 if exist %deduplicate_tmp_file% ( del %deduplicate_tmp_file% )
+if exist %sort_tmp_file% ( del %sort_tmp_file% )
 :clean_dir_end
 
 :check_settings_file_start
@@ -61,27 +63,33 @@ echo starting diff...
 sort /unique %compare_branches_file% /o %deduplicate_compare_branches_tmp_file%
 for /f "eol=#" %%i in ( %deduplicate_compare_branches_tmp_file% ) do (
     echo diff %basic_branch%..%%i
+    echo # diff %basic_branch%..%%i >> %diff_tmp_file%
     git diff --name-only %basic_branch%..%%i >> %diff_tmp_file%
+    echo. >> %diff_tmp_file%
 )
+if exist %deduplicate_compare_branches_tmp_file% ( del %deduplicate_compare_branches_tmp_file% )
 copy %diff_tmp_file% %result_tmp_file% > NUL
+if exist %diff_tmp_file% ( del %diff_tmp_file% )
 echo diff done!
 :diff_end
 
-set /p deduplicate=continue deduplicate?(y/n)
+set /p deduplicate=continue deduplicate? will remove branch name(y/n)
 if /i ["%deduplicate%"] == ["n"] ( goto deduplicate_end )
 :deduplicate_start
 echo starting deduplicate...
+for /f "eol=#" %%i in ( %result_tmp_file% ) do (
+    echo %%i >> "%sort_tmp_file%"
+)
 sort /unique %diff_tmp_file% /o %deduplicate_tmp_file%
+if exist %sort_tmp_file% ( del %sort_tmp_file% )
 copy %deduplicate_tmp_file% %result_tmp_file% > NUL
+if exist %deduplicate_tmp_file% ( del %deduplicate_tmp_file% )
 echo deduplicate done!
 :deduplicate_end
 
 copy %result_tmp_file% %result_file% > NUL
 @REM clean tmp files if exists
 if exist %result_tmp_file% ( del %result_tmp_file% )
-if exist %deduplicate_compare_branches_tmp_file% ( del %deduplicate_compare_branches_tmp_file% )
-if exist %diff_tmp_file% ( del %diff_tmp_file% )
-if exist %deduplicate_tmp_file% ( del %deduplicate_tmp_file% )
 echo SUCCESS! see diff result in %result_file%
 if exist %error_log_file% ( del %error_log_file% )
 goto end
