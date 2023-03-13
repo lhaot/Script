@@ -62,8 +62,8 @@ sort /unique %compare_branches_file% > %deduplicate_compare_branches_tmp_file%
 for /f "eol=#" %%i in ( %deduplicate_compare_branches_tmp_file% ) do (
     echo diff %basic_branch%..%%i
     git diff --name-only %basic_branch%..%%i >> %diff_tmp_file%
-    copy %diff_tmp_file% %result_tmp_file% > NUL
 )
+copy %diff_tmp_file% %result_tmp_file% > NUL
 echo diff done!
 :diff_end
 
