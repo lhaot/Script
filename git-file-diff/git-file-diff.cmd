@@ -58,7 +58,7 @@ echo basic branch is %basic_branch%.
 
 :diff_start
 echo starting diff...
-sort /unique %compare_branches_file% > %deduplicate_compare_branches_tmp_file%
+sort /unique %compare_branches_file% /o %deduplicate_compare_branches_tmp_file%
 for /f "eol=#" %%i in ( %deduplicate_compare_branches_tmp_file% ) do (
     echo diff %basic_branch%..%%i
     git diff --name-only %basic_branch%..%%i >> %diff_tmp_file%
@@ -71,7 +71,7 @@ set /p deduplicate=continue deduplicate?(y/n)
 if /i ["%deduplicate%"] == ["n"] ( goto deduplicate_end )
 :deduplicate_start
 echo starting deduplicate...
-sort /unique %diff_tmp_file% > %deduplicate_tmp_file%
+sort /unique %diff_tmp_file% /o %deduplicate_tmp_file%
 copy %deduplicate_tmp_file% %result_tmp_file% > NUL
 echo deduplicate done!
 :deduplicate_end
