@@ -90,7 +90,7 @@ if exist %deduplicate_tmp_file% ( del %deduplicate_tmp_file% )
 echo diff done!
 :diff_end
 
-if "true" == "%name_only%" goto deduplicate_end
+if "false" == "%name_only%" goto deduplicate_end
 set /p deduplicate=continue deduplicate? will remove branch name(y/n)
 if /i ["%deduplicate%"] == ["n"] ( goto deduplicate_end )
 :deduplicate_start
